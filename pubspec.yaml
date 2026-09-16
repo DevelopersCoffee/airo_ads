@@ -1,0 +1,20 @@
+name: airo_ads
+description: Google Mobile Ads SDK wrapper, in-app AdMob Native card widgets, non-intrusive Pause Ads, lower-third overlays, and VAST/VMAP ad tag parser for Flutter.
+version: 1.0.0
+homepage: https://developerscoffee.com
+repository: https://github.com/DevelopersCoffee/airo_ads
+issue_tracker: https://github.com/DevelopersCoffee/airo_ads/issues
+
+environment:
+  sdk: ^3.12.2
+  flutter: ">=3.18.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_mobile_ads: ^7.0.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

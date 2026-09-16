@@ -1,0 +1,22 @@
+name: example
+description: Interactive demonstration app for airo_ads package.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+  flutter: ">=3.18.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  airo_ads:
+    path: ../
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
