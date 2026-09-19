@@ -31,6 +31,18 @@ class _ExampleHomePageState extends State<ExampleHomePage> {
   bool _isPaused = false;
   bool _showLowerThird = false;
   String _vastStatus = 'Not generated';
+  String _statusLog = 'Ready';
+
+  final AiroInterstitialAdManager _interstitialManager =
+      AiroInterstitialAdManager();
+  final AiroRewardedAdManager _rewardedManager = AiroRewardedAdManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _interstitialManager.loadAd();
+    _rewardedManager.loadAd();
+  }
 
   void _togglePause() {
     setState(() {
@@ -54,10 +66,49 @@ class _ExampleHomePageState extends State<ExampleHomePage> {
     });
   }
 
+  Future<void> _showInterstitial() async {
+    final shown = await _interstitialManager.showIfAllowed(
+      onAdDismissed: () {
+        setState(() {
+          _statusLog = 'Interstitial dismissed';
+        });
+        _interstitialManager.loadAd();
+      },
+    );
+    if (!shown) {
+      setState(() {
+        _statusLog = 'Interstitial not ready or denied by policy';
+      });
+    }
+  }
+
+  Future<void> _showRewarded() async {
+    final shown = await _rewardedManager.showIfAllowed(
+      onUserEarnedReward: (reward) {
+        setState(() {
+          _statusLog = 'User earned reward: ${reward.amount} ${reward.type}';
+        });
+      },
+      onAdDismissed: () {
+        _rewardedManager.loadAd();
+      },
+    );
+    if (!shown) {
+      setState(() {
+        _statusLog = 'Rewarded ad not ready or denied by policy';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Airo Ads Demo')),
+      bottomNavigationBar: const SafeArea(
+        child: AiroBannerAdWidget(
+          bannerStyle: AiroBannerStyle.anchoredAdaptive,
+        ),
+      ),
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -65,6 +116,55 @@ class _ExampleHomePageState extends State<ExampleHomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Status: $_statusLog',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Full-Screen Ad Formats',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: _showInterstitial,
+                                icon: const Icon(Icons.fullscreen),
+                                label: const Text('Interstitial'),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: _showRewarded,
+                                icon: const Icon(Icons.card_giftcard),
+                                label: const Text('Rewarded'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -176,4 +276,12 @@ class _ExampleHomePageState extends State<ExampleHomePage> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _interstitialManager.dispose();
+    _rewardedManager.dispose();
+    super.dispose();
+  }
 }
+

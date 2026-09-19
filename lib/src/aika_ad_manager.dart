@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 
+import 'aika_ad_ids.dart';
 import 'aika_ad_policy.dart';
 import 'aika_ad_sdk.dart';
+import 'placement/airo_ad_placement_engine.dart';
 
 /// Device form factors supported for ad targeting.
 enum AiroDeviceFormFactor { mobile, tablet, tv, desktop, unknown }
@@ -11,19 +13,28 @@ enum AiroDeviceFormFactor { mobile, tablet, tv, desktop, unknown }
 /// Initializes Mobile Ads only on Android/iOS phone & tablet profiles. Leanback,
 /// web, and desktop never load the SDK.
 class AikaAdManager {
-  AikaAdManager._({AikaAdPolicy? policy, AikaAdSdk? sdk})
-    : policy = policy ?? AikaAdPolicy(),
-      _sdk = sdk ?? const AikaAdSdk();
+  AikaAdManager._({
+    AikaAdPolicy? policy,
+    AikaAdSdk? sdk,
+    AiroAdUnitConfig unitConfig = const AiroAdUnitConfig(),
+  })  : policy = policy ?? AikaAdPolicy(),
+        _sdk = sdk ?? const AikaAdSdk(),
+        placementEngine = AiroAdPlacementEngine(unitConfig: unitConfig);
 
   @visibleForTesting
-  factory AikaAdManager.test({AikaAdPolicy? policy, AikaAdSdk? sdk}) {
-    return AikaAdManager._(policy: policy, sdk: sdk);
+  factory AikaAdManager.test({
+    AikaAdPolicy? policy,
+    AikaAdSdk? sdk,
+    AiroAdUnitConfig unitConfig = const AiroAdUnitConfig(),
+  }) {
+    return AikaAdManager._(policy: policy, sdk: sdk, unitConfig: unitConfig);
   }
 
   static final AikaAdManager instance = AikaAdManager._();
 
   final AikaAdPolicy policy;
   final AikaAdSdk _sdk;
+  final AiroAdPlacementEngine placementEngine;
 
   bool _sdkReady = false;
   Future<void>? _initializing;
@@ -70,7 +81,8 @@ class AikaAdManager {
     );
   }
 
-  void recordAdImpression() {
-    policy.recordImpression();
+  void recordAdImpression([DateTime? at, AiroAdFormat? format]) {
+    policy.recordImpression(at, format);
   }
 }
+
